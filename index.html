@@ -612,7 +612,6 @@
 
     <div class="section">
       <div class="section-head"><span class="section-dot"></span><h2>운영 정보</h2></div>
-      <p class="hint">duration은 공식 안내나 확실한 근거가 있을 때만 적어주세요.</p>
       <div class="grid">
         <div class="field">
           <label for="f-open">영업 시작</label>
@@ -645,10 +644,6 @@
             <option value="있음">있음</option>
             <option value="없음">없음</option>
           </select>
-        </div>
-        <div class="field">
-          <label for="f-duration">체류 목안 시간(분)</label>
-          <input type="number" id="f-duration" min="0" placeholder="근거 있을 때만">
         </div>
         <div class="field" style="justify-content:flex-end;">
           <label style="display:flex;align-items:center;gap:7px;cursor:pointer;">
@@ -1213,7 +1208,6 @@
     document.getElementById("f-close").value = s.closeTime || "";
     document.getElementById("f-hoursnote").value = s.hoursNote || "";
     document.getElementById("f-parking").value = s.parking || "";
-    document.getElementById("f-duration").value = s.duration || "";
     document.getElementById("f-needscheck").checked = !!s.needsCheck;
     document.getElementById("f-feenote").value = s.feeNote || "";
     document.getElementById("f-home").value = s.home || "";
@@ -1324,7 +1318,6 @@
       advance: advanceOn ? document.getElementById("f-advance").value : "",
       advanceNote: advanceOn ? document.getElementById("f-advance-note").value.trim() : "", // 11/11추가: 사전예매 관련 참고사항
       parking: document.getElementById("f-parking").value,
-      duration: document.getElementById("f-duration").value,
       // needsCheck: 체크박스를 직접 눌렀거나, "사전예매 가능"인데 몇개월인지 비워뒀으면 자동으로 true
       // (10/22: 입장료처럼 "켜놨는데 상세가 없으면 재확인 필요로 알려주기" 로직 추가)
       needsCheck: document.getElementById("f-needscheck").checked
@@ -1382,7 +1375,8 @@
     // 10/22: place_id 열 삭제 (핵심 기능에 안 쓰이고 입력부담만 커서)
     // 10/22: 사전예매 가능여부(사전예매가능)와 개월수(사전예매개월)를 분리해서 열 추가
     // 11/11추가: 사전예매 참고사항(사전예매비고) 열 추가
-    const headers = ["이름","카테고리","소개","주소","도도부현","지역","위도","경도","최근역","도보분","영업시작","영업종료","예외사항","휴무요일","사전예매가능","사전예매개월","사전예매비고","주차장","체류분","재확인필요","입장료유무","티켓종류별요금","연령비고","태그","홈페이지","이미지","이미지출처"];
+    // 11/17추가: 사용 안 하는 체류분(체류 목안 시간) 열 삭제
+    const headers = ["이름","카테고리","소개","주소","도도부현","지역","위도","경도","최근역","도보분","영업시작","영업종료","예외사항","휴무요일","사전예매가능","사전예매개월","사전예매비고","주차장","재확인필요","입장료유무","티켓종류별요금","연령비고","태그","홈페이지","이미지","이미지출처"];
 
     // spots配列を1件ずつ「CSVの1行分の文字列」に変換していく
     const rows = spots.map(s => {
@@ -1396,7 +1390,7 @@
       return [
         s.name, s.category, s.desc, s.address, s.prefecture, s.area, s.lat, s.lng, s.station, s.walk,
         s.openTime, s.closeTime, s.hoursNote, (s.closedDays||[]).join("/"),
-        s.advanceKnown ? "Y":"N", s.advance, s.advanceNote, s.parking, s.duration,
+        s.advanceKnown ? "Y":"N", s.advance, s.advanceNote, s.parking,
         s.needsCheck ? "Y":"N", s.fee ? "Y":"N", ticketStr, s.feeNote,
         (s.tags||[]).join("/"), s.home, s.image, s.imageCredit
       // .map(toCsvField) で各値をCSV用に安全な形に変換 → .join(",") でカンマ区切りの1行の文字列にする
@@ -1485,15 +1479,16 @@
       const SQLmod = await getSQL();
       const db = new SQLmod.Database();
       // CURATION_SPOTS 표(ERD v10과 동일한 구조)
-      // 11/02修正: 위도/경도는 REAL(소수), 도보분・사전예매개월・체류분은 INTEGER(정수)로 변경
+      // 11/02修正: 위도/경도는 REAL(소수), 도보분・사전예매개월은 INTEGER(정수)로 변경
       //           (TEXT로 저장하면 정렬이나 "3000엔 이하" 같은 검색이 제대로 안 되기 때문)
+      // 11/17: 사용 안 하는 duration(체류 목안 시간) 열 삭제
       db.run(
         "CREATE TABLE curation_spots (" +
         "id TEXT PRIMARY KEY, name TEXT, category TEXT, description TEXT, address TEXT, prefecture TEXT, area TEXT, " +
         "latitude REAL, longitude REAL, nearest_station TEXT, walk_minutes INTEGER, " +
         "open_time TEXT, close_time TEXT, hours_note TEXT, closed_days TEXT, " +
         "advance_booking_known INTEGER, advance_booking_months INTEGER, advance_booking_note TEXT, " + // 11/11: 사전예매 참고사항 열 추가
-        "parking TEXT, duration INTEGER, needs_check INTEGER, " +
+        "parking TEXT, needs_check INTEGER, " +
         "admission_fee INTEGER, admission_note TEXT, tags TEXT, " +
         "homepage_url TEXT, image_url TEXT, image_credit TEXT)"
       );
@@ -1505,7 +1500,7 @@
         "price_adult INTEGER, price_teen INTEGER, price_senior INTEGER, price_child INTEGER, ticket_note TEXT)"
       );
       const insertSpot = db.prepare(
-        "INSERT INTO curation_spots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" // 11/11: advance_booking_note 추가로 27개
+        "INSERT INTO curation_spots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" // 11/17: duration 삭제로 26개
       );
       const insertTicket = db.prepare(
         "INSERT INTO admission_tickets VALUES (?,?,?,?,?,?,?,?)"
@@ -1516,7 +1511,7 @@
           toNum(s.lat), toNum(s.lng), s.station||"", toNum(s.walk),   // 11/02: 숫자로 변환
           s.openTime||"", s.closeTime||"", s.hoursNote||"", (s.closedDays||[]).join("/"),
           s.advanceKnown?1:0, toNum(s.advance), s.advanceNote||"",    // 11/11: 사전예매 참고사항 추가
-          s.parking||"", toNum(s.duration), s.needsCheck?1:0,         // 11/02: 숫자로 변환
+          s.parking||"", s.needsCheck?1:0,                            // 11/17: duration 삭제
           s.fee?1:0, s.feeNote||"", (s.tags||[]).join("/"),
           s.home||"", s.image||"", s.imageCredit||""
         ]);
@@ -1569,7 +1564,7 @@
           closedDays: obj.closed_days ? obj.closed_days.split("/").filter(Boolean) : [],
           advanceKnown: !!obj.advance_booking_known, advance: toStr(obj.advance_booking_months),       // 11/02: 숫자→문자
           advanceNote: obj.advance_booking_note || "",                                                 // 11/11추가
-          parking: obj.parking, duration: toStr(obj.duration), needsCheck: !!obj.needs_check,          // 11/02: 숫자→문자
+          parking: obj.parking, needsCheck: !!obj.needs_check,          // 11/17: duration 삭제
           fee: !!obj.admission_fee, feeNote: obj.admission_note,
           tags: obj.tags ? obj.tags.split("/").filter(Boolean) : [],
           home: obj.homepage_url, image: obj.image_url, imageCredit: obj.image_credit,
