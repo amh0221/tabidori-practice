@@ -552,9 +552,18 @@
       <div class="section-head"><span class="section-dot"></span><h2>기본 정보</h2></div>
       <div class="grid">
         <div class="field full">
-          <label class="req" for="f-name">스팟 이름</label>
-          <input type="text" id="f-name" placeholder="예: 돈키호테 신주쿠점" required>
+          <label class="req" for="f-name-ko">스팟 이름 (한국어, name_ko)</label>
+          <input type="text" id="f-name-ko" placeholder="예: 돈키호테 신주쿠점" required>
         </div>
+        <div class="field full">
+          <label for="f-name-ja">스팟 이름 (일본어, name_ja) (선택)</label>
+          <input type="text" id="f-name-ja" placeholder="예: ドン・キホーテ新宿店">
+        </div>
+        <div class="field full">
+          <label for="f-placeid">Google Place ID (선택)</label>
+          <input type="text" id="f-placeid" placeholder="예: ChIJ...">
+        </div>
+        <p class="hint" style="grid-column:1/-1;margin-top:-4px;">구글의 <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place ID Finder</a>에서 장소 검색하면 Place ID를 찾을 수 있어요. 같은 장소인지 구분하는 데 쓰여서 중요해요!</p>
         <div class="field">
           <label for="f-cat">카테고리 (선택)</label>
           <!-- 10/29追加: 「숙소」はあまり使わなそうなので「액티비티」に変更 -->
@@ -598,7 +607,7 @@
           <label class="req" for="f-lng">경도 (longitude)</label>
           <input type="number" id="f-lng" step="any" placeholder="예: 139.7034">
         </div>
-        <p class="hint" style="grid-column:1/-1;margin-top:-4px;">구글맵에서 장소를 우클릭하면 맨 위에 위도,경도 숫자가 떠요. 그걸 복사해서 넣으면 돼요.</p>
+        <p class="hint" style="grid-column:1/-1;margin-top:-4px;">⚠️ 구글맵에서 복사한 좌표는 쓰면 안 돼요(구글 이용약관 위반). <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>에서 해당 장소를 검색해서 좌표를 확인해주세요. Wikidata에 없는 작은 장소는 비워둬도 괜찮아요(Place ID로 나중에 받아올 수 있어요).</p>
         <div class="field">
           <label for="f-station">가장 가까운 역</label>
           <input type="text" id="f-station" placeholder="예: 신주쿠역">
@@ -745,14 +754,18 @@
           <input type="url" id="f-home" placeholder="https://...">
         </div>
         <div class="field full">
+          <label for="f-notice">공지/휴업정보 페이지 URL (선택)</label>
+          <input type="url" id="f-notice" placeholder="https://... (임시휴관 공지 등이 올라오는 페이지)">
+        </div>
+        <div class="field full">
           <label for="f-img">대표 이미지 URL</label>
           <input type="url" id="f-img" placeholder="https://...">
         </div>
         <div class="field full">
           <label for="f-imgcredit">이미지 출처 / 저작권자</label>
-          <input type="text" id="f-imgcredit" placeholder="예: 공식 홈페이지, ○○관광청, 직접 촬영">
+          <input type="text" id="f-imgcredit" placeholder="예: 직접 촬영, Wikimedia Commons(작성자명)">
         </div>
-        <p class="hint" style="grid-column:1/-1;margin:-6px 0 0;">⚠️ 구글 이미지 검색 결과는 저작권 때문에 쓰면 안 돼요. 공식 홈페이지/보도자료/직접 촬영 사진만 사용해주세요.</p>
+        <p class="hint" style="grid-column:1/-1;margin:-6px 0 0;">⚠️ 구글 이미지 검색 결과뿐 아니라 공식 홈페이지 사진도 저작권 때문에 쓰면 안 돼요. <b>직접 촬영한 사진</b> 또는 <b>Wikimedia Commons</b>(라이선스 확인 필수) 사진만 사용해주세요.</p>
       </div>
     </div>
 
@@ -779,7 +792,7 @@
 
 <script>
 /* ============================================================
-   ここから下がJavaScript（画面を「動かす」部分
+   ここから下がJavaScript（画面を「動かす」部分）だ。
    CSSは見た目だけだったが、JSは
    「ボタンを押したら〇〇する」「入力されたデータを保存する」
    のような“動き”を担当している。
@@ -977,6 +990,8 @@
       // 「정보 재확인 필요」にチェックが入っていたら、赤文字の注意書きを追加
       if(s.needsCheck) rows.push('<span style="color:var(--danger)">⚠ 정보 재확인 필요</span>');
       if(s.home) rows.push('<span><b>홈페이지</b> <a href="'+escapeHtml(s.home)+'" target="_blank" rel="noopener">열기</a></span>');
+      if(s.noticeUrl) rows.push('<span><b>공지URL</b> <a href="'+escapeHtml(s.noticeUrl)+'" target="_blank" rel="noopener">열기</a></span>');
+      if(s.placeId) rows.push('<span><b>Place ID</b> '+escapeHtml(s.placeId)+'</span>');
       if(s.imageCredit) rows.push('<span><b>이미지 출처</b> '+escapeHtml(s.imageCredit)+'</span>');
       // タグ(야경・포토스팟など)を、ひとつずつ小さいシール風のHTMLに変換して連結
       const tags = (s.tags||[]).map(t=>'<span class="sticker">'+escapeHtml(t)+'</span>').join("");
@@ -987,7 +1002,7 @@
         '<div class="ticket" data-id="'+s.id+'">' +            // data-id に保存時のIDを入れておく（削除の時に使う）
           '<div class="ticket-main">' +
             '<div class="ticket-top">' +
-              '<span class="ticket-name">'+escapeHtml(s.name)+'</span>' +
+              '<span class="ticket-name">'+escapeHtml(s.name)+(s.nameJa?' <small style="opacity:.6;">('+escapeHtml(s.nameJa)+')</small>':'')+'</span>' +
               '<span class="ticket-cat">'+escapeHtml(s.category)+'</span>' +
             '</div>' +
             '<div class="ticket-meta">'+rows.join("")+'</div>' +   // 上で集めたrowsを1つの文字列にして差し込む
@@ -1194,7 +1209,9 @@
 
   // ===== 「✎」ボタンを押した時、フォームに既存のデータを流し込んで修正モードに入る関数（10/23追加） =====
   function startEdit(s){
-    document.getElementById("f-name").value = s.name || "";
+    document.getElementById("f-name-ko").value = s.name || "";
+    document.getElementById("f-name-ja").value = s.nameJa || "";
+    document.getElementById("f-placeid").value = s.placeId || "";
     document.getElementById("f-cat").value = s.category || "관광지";
     document.getElementById("f-desc").value = s.desc || "";
     document.getElementById("f-addr").value = s.address || "";
@@ -1211,6 +1228,7 @@
     document.getElementById("f-needscheck").checked = !!s.needsCheck;
     document.getElementById("f-feenote").value = s.feeNote || "";
     document.getElementById("f-home").value = s.home || "";
+    document.getElementById("f-notice").value = s.noticeUrl || "";
     document.getElementById("f-img").value = s.image || "";
     document.getElementById("f-imgcredit").value = s.imageCredit || "";
 
@@ -1267,14 +1285,14 @@
 
     // ----- ① 必須項目（スポット名・지역・위도・경도）のチェック -----
     // 10/23追加: ラベルには必須(*)と書いてあるのに、実際はname以外チェックしてなかったバグを修正
-    const name = document.getElementById("f-name").value.trim();
+    const name = document.getElementById("f-name-ko").value.trim();
     const area = document.getElementById("f-area").value.trim();
     const pref = document.getElementById("f-pref").value; // 11/03追加
     const lat = document.getElementById("f-lat").value.trim();
     const lng = document.getElementById("f-lng").value.trim();
     // requiredChecks: [値, エラーメッセージ, フォーカスを戻すid] の組み合わせを順番にチェックする配列
     const requiredChecks = [
-      [name, "스팟 이름은 꼭 입력해주세요", "f-name"],
+      [name, "스팟 이름은 꼭 입력해주세요", "f-name-ko"],
       [pref, "도도부현을 선택해주세요", "f-pref"],
       [area, "지역(에어리어)은 꼭 입력해주세요", "f-area"],
       [lat, "위도는 꼭 입력해주세요", "f-lat"],
@@ -1299,6 +1317,8 @@
       //     ほぼ確実に世界で1つだけのユニークな値を新しく作る（10/23: 修正モード対応で分岐追加）
       id: editingId || (Date.now()+"_"+Math.random().toString(36).slice(2,7)),
       name: name,
+      nameJa: document.getElementById("f-name-ja").value.trim(),
+      placeId: document.getElementById("f-placeid").value.trim(),
       category: document.getElementById("f-cat").value,          // プルダウンで選んだカテゴリ
       desc: document.getElementById("f-desc").value.trim(),
       address: document.getElementById("f-addr").value.trim(),
@@ -1327,6 +1347,7 @@
       feeNote: document.getElementById("f-feenote").value.trim(), // 연령 기준 비고（10/16: 스팟 전체 1개로 원복）
       tags: selectedTags.slice(),                    // タグも同様にコピーして保存
       home: document.getElementById("f-home").value.trim(),
+      noticeUrl: document.getElementById("f-notice").value.trim(),
       image: document.getElementById("f-img").value.trim(),
       imageCredit: document.getElementById("f-imgcredit").value.trim() // 10/15 추가: 이미지 출처/저작권자
     };
@@ -1351,7 +1372,7 @@
     // ----- ⑥ フォームを初期状態にリセットして、次の入力に備える -----
     // 10/23: リセット処理はresetFormState()にまとめた（修正キャンセル時と共通で使うため）
     resetFormState();
-    document.getElementById("f-name").focus(); // 次の入力がすぐできるよう、名前欄にカーソルを戻す
+    document.getElementById("f-name-ko").focus(); // 次の入力がすぐできるよう、名前欄にカーソルを戻す
   });
 
   // ===== 1つの値を「CSVのルールに合った文字」に変換する関数 =====
@@ -1376,7 +1397,8 @@
     // 10/22: 사전예매 가능여부(사전예매가능)와 개월수(사전예매개월)를 분리해서 열 추가
     // 11/11추가: 사전예매 참고사항(사전예매비고) 열 추가
     // 11/17추가: 사용 안 하는 체류분(체류 목안 시간) 열 삭제
-    const headers = ["이름","카테고리","소개","주소","도도부현","지역","위도","경도","최근역","도보분","영업시작","영업종료","예외사항","휴무요일","사전예매가능","사전예매개월","사전예매비고","주차장","재확인필요","입장료유무","티켓종류별요금","연령비고","태그","홈페이지","이미지","이미지출처"];
+    // 11/18추가: 일본어이름, placeid, 공지URL 열 추가 (현우 피드백 반영)
+    const headers = ["한국어이름","일본어이름","placeid","카테고리","소개","주소","도도부현","지역","위도","경도","최근역","도보분","영업시작","영업종료","예외사항","휴무요일","사전예매가능","사전예매개월","사전예매비고","주차장","재확인필요","입장료유무","티켓종류별요금","연령비고","태그","홈페이지","공지URL","이미지","이미지출처"];
 
     // spots配列を1件ずつ「CSVの1行分の文字列」に変換していく
     const rows = spots.map(s => {
@@ -1388,11 +1410,11 @@
       ).join("; ");
       // 配列の中に、headersと同じ順番で値を並べる
       return [
-        s.name, s.category, s.desc, s.address, s.prefecture, s.area, s.lat, s.lng, s.station, s.walk,
+        s.name, s.nameJa, s.placeId, s.category, s.desc, s.address, s.prefecture, s.area, s.lat, s.lng, s.station, s.walk,
         s.openTime, s.closeTime, s.hoursNote, (s.closedDays||[]).join("/"),
         s.advanceKnown ? "Y":"N", s.advance, s.advanceNote, s.parking,
         s.needsCheck ? "Y":"N", s.fee ? "Y":"N", ticketStr, s.feeNote,
-        (s.tags||[]).join("/"), s.home, s.image, s.imageCredit
+        (s.tags||[]).join("/"), s.home, s.noticeUrl, s.image, s.imageCredit
       // .map(toCsvField) で各値をCSV用に安全な形に変換 → .join(",") でカンマ区切りの1行の文字列にする
       ].map(toCsvField).join(",");
     });
@@ -1482,15 +1504,16 @@
       // 11/02修正: 위도/경도는 REAL(소수), 도보분・사전예매개월은 INTEGER(정수)로 변경
       //           (TEXT로 저장하면 정렬이나 "3000엔 이하" 같은 검색이 제대로 안 되기 때문)
       // 11/17: 사용 안 하는 duration(체류 목안 시간) 열 삭제
+      // 11/18: 현우 피드백 반영 — name_ja(일본어이름), place_id, notice_url(공지URL) 열 추가
       db.run(
         "CREATE TABLE curation_spots (" +
-        "id TEXT PRIMARY KEY, name TEXT, category TEXT, description TEXT, address TEXT, prefecture TEXT, area TEXT, " +
+        "id TEXT PRIMARY KEY, name TEXT, name_ja TEXT, place_id TEXT, category TEXT, description TEXT, address TEXT, prefecture TEXT, area TEXT, " +
         "latitude REAL, longitude REAL, nearest_station TEXT, walk_minutes INTEGER, " +
         "open_time TEXT, close_time TEXT, hours_note TEXT, closed_days TEXT, " +
         "advance_booking_known INTEGER, advance_booking_months INTEGER, advance_booking_note TEXT, " + // 11/11: 사전예매 참고사항 열 추가
         "parking TEXT, needs_check INTEGER, " +
         "admission_fee INTEGER, admission_note TEXT, tags TEXT, " +
-        "homepage_url TEXT, image_url TEXT, image_credit TEXT)"
+        "homepage_url TEXT, notice_url TEXT, image_url TEXT, image_credit TEXT)"
       );
       // ADMISSION_TICKETS 표
       // 11/02修正: 요금 4개(성인/청소년/노인/어린이)는 INTEGER(정수)로 변경
@@ -1500,20 +1523,21 @@
         "price_adult INTEGER, price_teen INTEGER, price_senior INTEGER, price_child INTEGER, ticket_note TEXT)"
       );
       const insertSpot = db.prepare(
-        "INSERT INTO curation_spots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" // 11/17: duration 삭제로 26개
+        "INSERT INTO curation_spots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" // 11/18: name_ja/place_id/notice_url 추가로 29개
       );
       const insertTicket = db.prepare(
         "INSERT INTO admission_tickets VALUES (?,?,?,?,?,?,?,?)"
       );
       spots.forEach(s=>{
         insertSpot.run([
-          String(s.id), s.name||"", s.category||"", s.desc||"", s.address||"", s.prefecture||"", s.area||"",  // 11/03: prefecture 추가
+          String(s.id), s.name||"", s.nameJa||"", s.placeId||"",     // 11/18: name_ja/place_id 추가
+          s.category||"", s.desc||"", s.address||"", s.prefecture||"", s.area||"",  // 11/03: prefecture 추가
           toNum(s.lat), toNum(s.lng), s.station||"", toNum(s.walk),   // 11/02: 숫자로 변환
           s.openTime||"", s.closeTime||"", s.hoursNote||"", (s.closedDays||[]).join("/"),
           s.advanceKnown?1:0, toNum(s.advance), s.advanceNote||"",    // 11/11: 사전예매 참고사항 추가
           s.parking||"", s.needsCheck?1:0,                            // 11/17: duration 삭제
           s.fee?1:0, s.feeNote||"", (s.tags||[]).join("/"),
-          s.home||"", s.image||"", s.imageCredit||""
+          s.home||"", s.noticeUrl||"", s.image||"", s.imageCredit||""  // 11/18: notice_url 추가
         ]);
         (s.tickets||[]).forEach(t=>{
           insertTicket.run([
@@ -1557,7 +1581,8 @@
         const obj = {};
         cols.forEach((c,i)=>{ obj[c]=row[i]; });
         return {
-          id: obj.id, name: obj.name, category: obj.category, desc: obj.description,
+          id: obj.id, name: obj.name, nameJa: obj.name_ja || "", placeId: obj.place_id || "",  // 11/18추가
+          category: obj.category, desc: obj.description,
           address: obj.address, prefecture: obj.prefecture || "", area: obj.area, lat: toStr(obj.latitude), lng: toStr(obj.longitude),  // 11/02: 숫자→문자
           station: obj.nearest_station, walk: toStr(obj.walk_minutes),                                 // 11/02: 숫자→문자
           openTime: obj.open_time, closeTime: obj.close_time, hoursNote: obj.hours_note,
@@ -1567,7 +1592,7 @@
           parking: obj.parking, needsCheck: !!obj.needs_check,          // 11/17: duration 삭제
           fee: !!obj.admission_fee, feeNote: obj.admission_note,
           tags: obj.tags ? obj.tags.split("/").filter(Boolean) : [],
-          home: obj.homepage_url, image: obj.image_url, imageCredit: obj.image_credit,
+          home: obj.homepage_url, noticeUrl: obj.notice_url || "", image: obj.image_url, imageCredit: obj.image_credit,  // 11/18추가: notice_url
           tickets: []
         };
       });
