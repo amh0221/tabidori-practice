@@ -1,8 +1,8 @@
 # PR 제목이 커밋 규칙을 지키는지 검사한다.
 #
-# 기능 → develop 은 squash 머지라서 develop 에 남는 커밋 메시지가 곧 PR 제목이다.
-# (저장소 설정에서 squash 기본 메시지를 "Pull request title" 로 둔다)
-# 그래서 커밋 하나하나보다 PR 제목을 막는 쪽이 확실하다.
+# 머지는 merge commit 이라 PR 제목이 머지 커밋 메시지 두 번째 줄로 남는다.
+# 브랜치 안 커밋 하나하나는 lefthook commit-msg 훅이 로컬에서 검사한다 —
+# 훅이 안 깔린 환경에서 만든 커밋은 여기서 잡히지 않는다.
 # GitHub 룰셋의 커밋 메시지 규칙은 Enterprise 전용이라 쓸 수 없다.
 name: PR 제목 검사
 

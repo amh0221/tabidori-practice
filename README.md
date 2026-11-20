@@ -31,9 +31,13 @@
 **Mac**
 
 ```bash
-brew install uv nvm   # 또는 위 Windows 4번의 curl 명령
+curl -LsSf https://astral.sh/uv/install.sh | sh                                   # uv (파이썬)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash    # nvm (Node)
+# 터미널을 닫았다 다시 열고
 nvm install 24
 ```
+
+`brew install nvm` 은 쓰지 않습니다 — 셸 설정(`~/.zshrc`)을 따로 넣어야 `nvm` 이 동작합니다.
 
 Docker Desktop도 설치합니다.
 
@@ -49,10 +53,10 @@ git checkout develop
 ### 3. 환경변수
 
 ```bash
-cp .env.example .env
+cp -n .env.example .env     # -n: 이미 .env 가 있으면 덮어쓰지 않는다
 ```
 
-키 값은 팀 채널에서 받아 `.env` 에 넣습니다. → 아래 [환경변수(.env) 규칙](#환경변수env-규칙)
+키는 **각자 발급**해서 `.env` 에 넣습니다. → 아래 [환경변수(.env) 규칙](#환경변수env-규칙)
 
 ### 4. 처음 한 번 설치
 
@@ -72,9 +76,15 @@ docker compose up
 | --- | --- |
 | http://localhost:5173 | 화면 — "백엔드 연결: 정상" 이 보이면 성공 |
 | http://localhost:8000/docs | 백엔드 API 문서 |
-| http://localhost:2024 | 에이전트 서버 (langgraph dev) |
+| http://localhost:2024/docs | 에이전트 서버 문서 (langgraph dev) |
 
 처음에는 이미지·패키지를 받느라 몇 분 걸립니다. 끌 때는 `Ctrl+C`, 완전히 정리할 때는 `docker compose down`.
+(`docker compose down -v` 는 DB 데이터까지 지웁니다)
+
+### 6. Claude 훅 확인
+
+VS Code 에서 Claude Code 를 열고 **"git commit 해줘"** 라고 합니다. **차단되면 정상**입니다.
+그대로 커밋되면 훅이 안 도는 것이니 팀 채널에 알려 주세요 (`node` 가 안 잡히는 경우가 많습니다).
 
 ---
 
@@ -95,7 +105,7 @@ docker compose up
 | 규칙 | 이유 |
 | --- | --- |
 | **`.env` 는 절대 커밋·업로드하지 않는다** (스크린샷·채팅 붙여넣기 포함) | 키가 새면 남이 우리 결제 계정으로 API를 씁니다. `.gitignore` 가 막지만 `git add -f` 는 못 막습니다 |
-| **키 값은 팀 채널로만 주고받는다** | 깃허브 이슈·PR 본문·커밋 메시지에 쓰지 않습니다 |
+| **키는 각자 발급하고 남에게 주지 않는다** | 깃허브 이슈·PR 본문·커밋 메시지에도 쓰지 않습니다. 누구 키에서 비용이 나는지 분명해야 합니다 |
 | **새 환경변수를 만들면 `.env.example` 에 이름과 설명을 같은 PR에 추가한다** | 다른 팀원 `.env` 에 없으면 그 사람 화면만 깨지고 원인을 못 찾습니다 |
 | **새 키를 추가·변경하면 PR 본문과 팀 채널에 "`.env` 에 ○○ 추가 필요"라고 알린다** | `.env` 는 git으로 전달되지 않습니다. 말하지 않으면 아무도 모릅니다 |
 | **키 이름을 바꾸면 옛 이름을 쓰는 코드가 없는지 확인한다** | 이름만 바뀌면 값이 비어 조용히 고정값·데모 모드로 돌 수 있습니다 |
@@ -110,8 +120,8 @@ docker compose up
 
 ```
 main      ← 시연 가능한 안정판. develop 에서 PR(merge commit)로만 들어온다
-develop   ← 통합 브랜치. 기능 브랜치를 PR(squash)로 머지한다
-feat/<이슈번호>-<이름> · fix/… · chore/… · docs/…   ← develop 에서 딴다
+develop   ← 통합 브랜치. 기능 브랜치를 PR(merge commit)로 머지한다
+feat/<이름> · fix/… · chore/… · docs/…   ← develop 에서 딴다 (이슈와는 PR 본문 closes #N 으로 잇는다)
 ```
 
 - 두 브랜치 모두 직접 push 금지, CI 통과 후 머지
