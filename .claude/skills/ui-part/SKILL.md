@@ -11,7 +11,7 @@ description: 생성형 UI 카탈로그에 화면 부품을 새로 추가하거�
 
 | # | 위치 | 무엇 |
 | --- | --- | --- |
-| 1 | `backend/app/contracts/ui_parts.py` | props Pydantic 모델. 각 칸에 `Field(description=...)` — 이 설명이 Claude가 읽는 도구 설명이 된다 |
+| 1 | `contracts/src/tabidori_contracts/ui_parts.py` | props Pydantic 모델. 각 칸에 `Field(description=...)` — 이 설명이 Claude가 읽는 도구 설명이 된다 |
 | 2 | `frontend/src/catalog/<PartName>/<PartName>.tsx` | 컴포넌트. props는 자동 생성 타입에서 가져온다. 값을 받아 그리기만 한다 |
 | 3 | `frontend/src/catalog/<PartName>/<PartName>.stories.tsx` | 견본. **상태마다 하나씩**(평소·빈 값·긴 이름·위반·로딩) |
 | 4 | `frontend/src/renderer/registry.ts` | 등록표에 한 줄 |
@@ -20,7 +20,7 @@ description: 생성형 UI 카탈로그에 화면 부품을 새로 추가하거�
 
 1. **이 부품이 꼭 필요한가 먼저 묻는다.** 기존 부품의 props 하나로 되면 새로 만들지 않는다 — 부품이 늘면 Claude가 고를 선택지가 늘어 실수가 는다.
 2. 1번 스키마를 쓴다. 숫자·판정 값(이동시간·휴무·위반)은 **검증기가 채우는 칸**인지 Claude가 채우는 칸인지 description에 밝힌다. Claude가 숫자를 지어내면 안 된다.
-3. 프론트 타입을 다시 생성한다(명령은 `.github/workflows/ci.yml` 참고).
+3. 프론트 타입을 다시 생성한다(명령은 `CLAUDE.md` 실행·검증 명령 표).
 4. 2·3·4번을 만든다. 색·간격·동작 시간은 `styles/tokens.css` 변수만.
 5. 에이전트 출력 예시 JSON을 하나 만들어 계약 테스트에 추가한다 — 깨진 출력이 대체 화면으로 가는지도 하나.
 6. Storybook에서 모든 상태를 눈으로 확인한다.

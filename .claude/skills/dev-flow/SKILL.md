@@ -61,7 +61,7 @@ git checkout develop && git pull origin develop && git checkout -b <접두사>/<
 - 해당 폴더의 규칙(`.claude/rules/common/*.md`)이 파일을 열면 자동으로 올라온다. 따른다.
 - 버그 수정은 **재현 테스트를 먼저** 쓰고 실패를 보여준 뒤 고친다.
 - 화면 부품을 새로 만들면 `ui-part` 스킬.
-- 약속(모양)을 바꾸면 `backend/app/contracts/`를 고치고 프론트 타입을 다시 생성한다.
+- 약속(모양)을 바꾸면 `contracts/`를 고치고 프론트 타입을 다시 생성한다(`CLAUDE.md` 명령 표).
 
 ## ⑤ 검증
 

@@ -1,0 +1,42 @@
+# 의존성 버전 갱신 PR. 보안 갱신은 Dependabot alerts 쪽에서 처리한다.
+# PR은 develop 으로 보낸다 (main 은 develop 에서만 받는다)
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      python:
+        patterns: ["*"]
+    ignore:
+      # 메이저 갱신은 호환성 확인이 필요해서 자동 PR 대상에서 뺀다
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: "/frontend"
+    target-branch: develop
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      frontend:
+        patterns: ["*"]
+    ignore:
+      # typescript 는 5.9 에 묶어 둔다 — openapi-typescript 가 TS 6·7 을 아직 지원하지 않는다
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

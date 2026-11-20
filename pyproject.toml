@@ -1,0 +1,37 @@
+# 파이썬 쪽은 uv 워크스페이스 하나로 묶는다.
+# backend·agent가 contracts(약속의 원본)를 같이 import해야 해서, 패키지 셋을 한 락파일(uv.lock)로 관리한다.
+[project]
+name = "tabidori"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["contracts", "backend", "agent"]
+
+[tool.uv.sources]
+tabidori-contracts = { workspace = true }
+
+[dependency-groups]
+dev = [
+  "pytest>=9",
+  "ruff>=0.14",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F: 기본 오류 · I: import 정렬 · UP: 새 문법으로 · B: 흔한 버그 패턴
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+# 우리 패키지를 외부 패키지와 구분해 import 묶음을 나눈다
+known-first-party = ["app", "agent", "tabidori_contracts"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests", "agent/tests"]
+pythonpath = ["backend", "agent/src"]

@@ -1,0 +1,11 @@
+{
+  "name": "tabidori",
+  "private": true,
+  "description": "저장소 루트 — git 훅(lefthook) 설치용. 앱 코드는 frontend/ · backend/ · agent/",
+  "scripts": {
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "lefthook": "^2.2.2"
+  }
+}

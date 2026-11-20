@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "ping": "./src/agent/ping.py:graph"
+  },
+  "env": "../.env"
+}

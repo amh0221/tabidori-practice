@@ -1,15 +1,15 @@
 ---
 paths:
-  - "backend/app/contracts/**"
+  - "contracts/**"
   - "agent/**"
-  - "mcp/**"
+  - "backend/app/mcp/**"
 ---
 
 # 약속(contracts) 규칙
 
-## 모양은 `backend/app/contracts/`에만 정의한다
+## 모양은 `contracts/`에만 정의한다
 
-도메인별 파일로 나눈다(`plans.py`, `spots.py`, `verify.py`, `graph.py`, `mcp_tools.py`, `ui_parts.py` …). 웹서버·그래프·MCP 서버가 모두 여기서 import한다. **같은 모양을 두 곳에 따로 정의하지 않는다.**
+`contracts/src/tabidori_contracts/` 아래 도메인별 파일로 나눈다(`plans.py`, `spots.py`, `verify.py`, `graph.py`, `mcp_tools.py`, `ui_parts.py` …). 웹서버·그래프·MCP 서버가 모두 `from tabidori_contracts.<파일> import …`로 가져온다. backend와 agent가 같이 써야 해서 backend 안이 아니라 루트의 별도 패키지다(uv 워크스페이스). **같은 모양을 두 곳에 따로 정의하지 않는다.**
 
 프론트 타입은 손으로 쓰지 않는다. FastAPI가 만든 OpenAPI에서 `openapi-typescript`로 `frontend/src/api/generated/`에 생성한다.
 

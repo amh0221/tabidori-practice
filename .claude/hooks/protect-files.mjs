@@ -30,7 +30,7 @@ process.stdin.on("end", () => {
   if (/^\.env(\..+)?$/.test(name) && name !== ".env.example")
     deny("비밀값 파일은 수정하지 않는다. 필요한 키 이름만 .env.example에 추가하고 사람에게 값을 넣어 달라고 할 것.");
   if (p.includes("/frontend/src/api/generated/"))
-    deny("자동 생성 파일이다. backend/app/contracts를 고친 뒤 타입 생성 명령으로 다시 만들 것.");
+    deny("자동 생성 파일이다. contracts/를 고친 뒤 타입 생성 명령(CLAUDE.md 표)으로 다시 만들 것.");
   if (["uv.lock", "package-lock.json"].includes(name))
     deny("락파일은 패키지 매니저(uv add / npm install)로만 바꾼다.");
 

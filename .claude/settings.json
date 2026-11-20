@@ -4,13 +4,19 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-git-write.mjs\"" }
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-git-write.mjs\""
+          }
         ]
       },
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-files.mjs\"" }
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-files.mjs\""
+          }
         ]
       }
     ]
@@ -30,7 +36,17 @@
       "Bash(rg:*)",
       "Bash(find:*)",
       "Bash(wc:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(uv run ruff check:*)",
+      "Bash(uv run ruff format:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run format:check)",
+      "Bash(npm run build)",
+      "Bash(npm test)",
+      "Bash(npm run gen:api)",
+      "Bash(docker compose ps)",
+      "Bash(docker compose logs:*)"
     ],
     "deny": [
       "Read(./.env)",

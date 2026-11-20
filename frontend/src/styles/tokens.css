@@ -1,0 +1,56 @@
+/*
+ * 디자인 토큰 — 색·간격·동작 시간은 여기에만 정의하고 코드에서는 변수로만 쓴다.
+ * 색 규칙: .claude/rules/domain.md · UIUX 설계노트 6-21절 4번
+ */
+:root {
+  /* 메인 남색 */
+  --color-indigo-50: #f2f5fa; /* 상단바 */
+  --color-indigo-100: #e4eaf5; /* 트레이·어드바이저 패널 */
+  --color-indigo-700: #233d6b; /* 검증하기 버튼·선택·경로·핀 */
+
+  /* 포인트 주홍 — 확정하기 버튼 전용. 장식에 쓰지 않는다 */
+  --color-commit: #c1421a;
+
+  /* 판정 색 — 항상 아이콘과 함께 쓴다 */
+  --color-violation: #8e1c3e; /* 위반·휴무 + ⚠ */
+  --color-special-open: #0f6e78; /* 특별 개관 */
+
+  /* 중립 */
+  --color-text: #1b2233;
+  --color-text-sub: #55607a; /* 패널 위 대비 5.2:1 */
+  --color-border: #d9e0ec;
+  --color-surface: #ffffff;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  /* 동작 — 검증 연출 전체 상한 2초 (6-21절 7번) */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  font-family:
+    system-ui,
+    -apple-system,
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    sans-serif;
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-indigo-50);
+}

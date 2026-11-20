@@ -14,12 +14,12 @@ backend/app/
 │  ├─ service.py      비즈니스 로직. HTTP를 모른다(Request·Response를 import하지 않는다)
 │  ├─ repository.py   DB 조회·저장
 │  └─ models.py       SQLAlchemy 테이블 모델
-├─ contracts/         API·그래프·MCP·화면 부품의 모양 (Pydantic)
+├─ mcp/               MCP 서버 (/mcp). 그래프는 앱 DB에 직접 붙지 않고 이걸 거친다
 ├─ core/              설정(pydantic-settings)·DB 연결·공통 오류
 └─ main.py
 ```
 
-- **DB 모델과 API 모델을 섞지 않는다.** 테이블 모양이 바뀌어도 API 응답이 흔들리지 않게, 응답은 항상 `contracts/`의 Pydantic 모델로 변환해서 돌려준다.
+- **DB 모델과 API 모델을 섞지 않는다.** 테이블 모양이 바뀌어도 API 응답이 흔들리지 않게, 응답은 항상 `tabidori_contracts`의 Pydantic 모델로 변환해서 돌려준다.
 - 도메인끼리는 서로의 `service`를 부른다. 다른 도메인의 `repository`나 `models`를 직접 import하지 않는다.
 - 외부 API(Google·Open-Meteo·Claude)는 도메인 안의 `clients.py`로 감싼다. 테스트에서 가짜로 바꿀 수 있어야 한다.
 

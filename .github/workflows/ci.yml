@@ -1,0 +1,79 @@
+# PR마다 도는 검사. 로컬에서 검증할 때도 여기 명령을 그대로 복사해 쓴다 (dev-flow ⑤).
+# 작업(job) 이름이 룰셋의 "통과해야 할 검사" 목록에 그대로 나온다 — 바꾸면 룰셋도 고쳐야 한다.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: python (ruff · pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - name: 의존성 설치 (.python-version 의 파이썬을 uv가 받아 온다)
+        run: uv sync --frozen --all-packages
+      - name: 린트
+        run: uv run ruff check .
+      - name: 포맷 검사
+        run: uv run ruff format --check .
+      - name: 테스트
+        run: uv run pytest -q
+
+  frontend:
+    name: frontend (oxlint · prettier · tsc · vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: 린트
+        run: npm run lint
+      - name: 포맷 검사
+        run: npm run format:check
+      - name: 타입 검사 + 빌드
+        run: npm run build
+      - name: 테스트
+        run: npm test
+
+  contracts:
+    name: contracts (프론트 타입이 백엔드 약속과 같은가)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: uv sync --frozen --all-packages
+      - name: OpenAPI 다시 뽑기
+        working-directory: backend
+        run: uv run python -m app.openapi_export ../frontend/src/api/generated/openapi.json
+      - name: 프론트 타입 다시 만들기
+        working-directory: frontend
+        run: npm ci && npm run gen:api
+      - name: 커밋된 것과 다르면 실패
+        run: |
+          if ! git diff --exit-code -- frontend/src/api/generated; then
+            echo "::error::백엔드 약속(contracts)이 바뀌었는데 프론트 타입을 다시 만들지 않았어요. README의 '약속(타입) 다시 만들기'를 실행하고 커밋하세요."
+            exit 1
+          fi

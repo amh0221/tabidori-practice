@@ -1,0 +1,85 @@
+# 개발용 전체 실행:  docker compose up
+#   프론트  http://localhost:5173
+#   백엔드  http://localhost:8000/docs   (API 문서)
+#   에이전트 http://localhost:2024        (langgraph dev, 메모리 저장 — 껐다 켜면 대화 기록이 사라진다)
+#   앱 DB   localhost:5432
+#
+# 코드는 저장소를 통째로 연결(/workspace)해서 저장하면 바로 반영된다.
+# 패키지(uv.lock · package-lock.json)가 바뀌면:  docker compose up --build  가 아니라
+#   docker compose run --rm backend uv sync --frozen --all-packages
+#   docker compose run --rm frontend npm ci
+
+name: tabidori
+
+services:
+  db:
+    image: postgres:18
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      # postgres 18부터 데이터 경로가 /var/lib/postgresql 아래 버전별 폴더로 바뀌었다
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/python.Dockerfile
+    env_file: .env
+    # Windows 폴더에 저장소를 둬서 저장해도 재시작이 안 되면 .env 에 WATCHFILES_FORCE_POLLING=true 를 넣는다
+    working_dir: /workspace/backend
+    command: >
+      sh -c "uv sync --frozen --all-packages &&
+             uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workspace
+      - py_venv:/opt/venv
+    depends_on:
+      db:
+        condition: service_healthy
+
+  agent:
+    build:
+      context: .
+      dockerfile: docker/python.Dockerfile
+    env_file: .env
+    working_dir: /workspace/agent
+    command: >
+      sh -c "uv sync --frozen --all-packages &&
+             uv run langgraph dev --host 0.0.0.0 --port 2024 --no-browser"
+    ports:
+      - "2024:2024"
+    volumes:
+      - .:/workspace
+      - py_venv:/opt/venv
+    depends_on:
+      - backend
+
+  frontend:
+    image: node:24-bookworm-slim
+    env_file: .env
+    environment:
+      # 파일 변경 감지가 안 될 때만 "1"
+      WATCH_POLLING: "0"
+    working_dir: /workspace/frontend
+    # node_modules 는 컨테이너 전용 볼륨에 둔다 — Mac/Windows 쪽 node_modules 와 섞이지 않게
+    command: sh -c "[ -d node_modules/.bin ] || npm ci; npm run dev"
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/workspace
+      - fe_node_modules:/workspace/frontend/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  py_venv:
+  fe_node_modules:
