@@ -1,0 +1,20 @@
+# 편집기마다 들여쓰기·줄바꿈이 달라지지 않게 맞춘다 (VS Code는 EditorConfig 확장 필요)
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[*.md]
+# 마크다운은 줄 끝 공백 두 칸이 줄바꿈 문법이라 지우지 않는다
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab

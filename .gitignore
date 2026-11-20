@@ -1,0 +1,37 @@
+# ── 비밀값 ──
+.env
+.env.*
+!.env.example
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ── Node / 프론트 ──
+node_modules/
+dist/
+storybook-static/
+*.tsbuildinfo
+.vite/
+
+# ── Claude Code 개인 설정 (팀 설정 .claude/settings.json 은 커밋) ──
+.claude/settings.local.json
+CLAUDE.local.md
+
+# ── 편집기·OS ──
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ── 로그·임시 ──
+*.log
+tmp/
