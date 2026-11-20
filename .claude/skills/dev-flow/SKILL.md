@@ -53,7 +53,7 @@ git status --short                               # 이전 작업 잔여물이 �
 ## ③ 브랜치 (사람)
 
 ```bash
-git checkout develop && git pull origin develop && git checkout -b <접두사>/<이슈번호>-<이름>
+git checkout develop && git pull origin develop && git checkout -b <접두사>/<이름>
 ```
 
 ## ④ 구현
@@ -98,11 +98,13 @@ git push -u origin <브랜치명>
 
 | PR | 머지 방식 | 확인 |
 | --- | --- | --- |
-| 기능 브랜치 → `develop` | **squash** | `git merge-tree --write-tree --name-only origin/develop origin/<브랜치>` |
+| 기능 브랜치 → `develop` | **merge commit** | `git merge-tree --write-tree --name-only origin/develop origin/<브랜치>` |
 | `develop` → `main` | **merge commit** | `git log --oneline origin/main..origin/develop` 이 비어 있으면 아직 만들 게 없다 |
 
 develop → main을 squash로 머지하면 두 브랜치의 이력이 갈라져, 다음 PR부터 이미 들어간 커밋이 계속 다시 보인다. 그래서 이쪽은 merge commit이다.
 
-**PR 제목 = 최종 커밋 메시지**다(squash 기본 메시지를 PR 제목으로 설정). `.github/workflows/pr-title.yml`이 `<접두사>: <한국어 요약>` 형식을 검사한다. develop → main은 `release: <무엇이 들어갔나>`.
+merge commit 의 기본 메시지는 `Merge pull request #N from …` 이고 **두 번째 줄에 PR 제목**이 들어간다. `.github/workflows/pr-title.yml`이 그 PR 제목을 `<접두사>: <한국어 요약>` 형식으로 검사하고, 브랜치 안 각 커밋은 lefthook `commit-msg` 훅이 검사한다. develop → main은 `release: <무엇이 들어갔나>`.
+
+PR 본문 **첫 줄은 `closes #N`** 다. 브랜치 이름에 번호를 넣지 않으므로 이슈와 PR 을 잇는 곳은 여기뿐이다. 머지되면 이슈가 자동으로 닫힌다.
 
 PR 본문에는 **판단 근거(버린 대안 포함)** · **변경하지 않은 것** · **검증 결과 표**를 꼭 넣는다.

@@ -42,8 +42,8 @@
 
 ```
 main      ← 언제든 시연 가능한 안정판. develop에서만 PR로 들어온다 (merge commit)
-develop   ← 통합 브랜치. 기능 브랜치가 PR로 들어온다 (squash merge)
-feat/<이슈번호>-<이름>, fix/…, chore/…, docs/…  ← develop에서 딴다
+develop   ← 통합 브랜치. 기능 브랜치가 PR로 들어온다 (merge commit)
+feat/<이름>, fix/…, chore/…, docs/…  ← develop에서 딴다 (이슈 번호는 넣지 않는다)
 ```
 
 세부 단계는 `dev-flow` 스킬. 커밋 메시지·PR 제목은 `접두사: 한국어 요약` (`feat:` `fix:` `style:` `refactor:` `test:` `docs:` `chore:` `db:`, develop → main은 `release:`). PR 제목은 CI(`pr-title.yml`)가 검사한다.

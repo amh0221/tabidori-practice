@@ -20,6 +20,9 @@ storybook-static/
 *.tsbuildinfo
 .vite/
 
+# ── LangGraph (langgraph dev 가 메모리 대화 기록을 주기적으로 저장하는 곳) ──
+.langgraph_api/
+
 # ── Claude Code 개인 설정 (팀 설정 .claude/settings.json 은 커밋) ──
 .claude/settings.local.json
 CLAUDE.local.md
