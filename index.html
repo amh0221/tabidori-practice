@@ -605,11 +605,11 @@
           <input type="text" id="f-area" placeholder="예: 신주쿠, 아사쿠사, 교토">
         </div>
         <div class="field">
-          <label class="req" for="f-lat">위도 (latitude)</label>
+          <label for="f-lat">위도 (latitude)</label>
           <input type="number" id="f-lat" step="any" placeholder="예: 35.6938">
         </div>
         <div class="field">
-          <label class="req" for="f-lng">경도 (longitude)</label>
+          <label for="f-lng">경도 (longitude)</label>
           <input type="number" id="f-lng" step="any" placeholder="예: 139.7034">
         </div>
         <p class="hint" style="grid-column:1/-1;margin-top:-4px;">⚠️ 구글맵에서 복사한 좌표는 쓰면 안 돼요(구글 이용약관 위반). <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>에서 해당 장소를 검색해서 좌표를 확인해주세요. Wikidata에 없는 작은 장소는 비워둬도 괜찮아요(Place ID로 나중에 받아올 수 있어요).</p>
@@ -1288,7 +1288,8 @@
   form.addEventListener("submit", e=>{
     e.preventDefault(); // ページの再読み込みを止める（フォームのデフォルト動作をキャンセル）
 
-    // ----- ① 必須項目（スポット名・지역・위도・경도）のチェック -----
+    // ----- ① 必須項目（スポット名・도도부현・지역）のチェック -----
+    // 11/23修正: 위도・경도는 선택 항목으로 변경 (11/18 규칙: Wikidata에 없는 작은 장소는 비워둬도 됨)
     // 10/23追加: ラベルには必須(*)と書いてあるのに、実際はname以外チェックしてなかったバグを修正
     const name = document.getElementById("f-name-ko").value.trim();
     const area = document.getElementById("f-area").value.trim();
@@ -1299,9 +1300,7 @@
     const requiredChecks = [
       [name, "스팟 이름은 꼭 입력해주세요", "f-name-ko"],
       [pref, "도도부현을 선택해주세요", "f-pref"],
-      [area, "지역(에어리어)은 꼭 입력해주세요", "f-area"],
-      [lat, "위도는 꼭 입력해주세요", "f-lat"],
-      [lng, "경도는 꼭 입력해주세요", "f-lng"]
+      [area, "지역(에어리어)은 꼭 입력해주세요", "f-area"]
     ];
     // find(...) : 配列を順番に見ていって、値(checkItem[0])が空っぽの最初の項目を探す
     const firstMissing = requiredChecks.find(checkItem => !checkItem[0]);
@@ -1311,6 +1310,13 @@
       formError.style.display = "block";
       document.getElementById(firstMissing[2]).focus(); // その入力欄に自動でカーソルを戻す
       return; // 関数をここで終了。下のentry作成には進まない
+    }
+    // 11/23追加: 위도・경도는 선택이 됐지만, 한쪽만 입력하면 좌표로 쓸 수 없으니 막는다
+    if((lat && !lng) || (!lat && lng)){
+      formError.textContent = "위도와 경도는 둘 다 입력하거나, 둘 다 비워주세요";
+      formError.style.display = "block";
+      document.getElementById(lat ? "f-lng" : "f-lat").focus();
+      return;
     }
     formError.style.display = "none"; // チェックを通ったので、前回出ていたエラー文は隠す
 
@@ -1346,7 +1352,8 @@
       // needsCheck: 체크박스를 직접 눌렀거나, "사전예매 가능"인데 몇개월인지 비워뒀으면 자동으로 true
       // (10/22: 입장료처럼 "켜놨는데 상세가 없으면 재확인 필요로 알려주기" 로직 추가)
       needsCheck: document.getElementById("f-needscheck").checked
-        || (advanceOn && !document.getElementById("f-advance").value),
+        || (advanceOn && !document.getElementById("f-advance").value)
+        || !lat || !lng,   // 11/23추가: 좌표가 비어있으면 나중에 채워야 하니 재확인 필요로 표시
       fee: feeOn,                                   // 入場料スイッチが今ONかOFFか
       tickets: feeOn ? collectTickets() : [],        // ONの時だけ、入力されたチケット情報を集める。OFFなら空配列
       feeNote: document.getElementById("f-feenote").value.trim(), // 연령 기준 비고（10/16: 스팟 전체 1개로 원복）
